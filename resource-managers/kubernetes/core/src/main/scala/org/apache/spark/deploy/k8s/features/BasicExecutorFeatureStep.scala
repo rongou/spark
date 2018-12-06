@@ -74,6 +74,8 @@ private[spark] class BasicExecutorFeatureStep(kubernetesConf: KubernetesExecutor
     }
   private val executorLimitCores = kubernetesConf.get(KUBERNETES_EXECUTOR_LIMIT_CORES)
 
+  private val executorLimitGpus = kubernetesConf.get(KUBERNETES_EXECUTOR_LIMIT_GPUS)
+
   override def configurePod(pod: SparkPod): SparkPod = {
     val name = s"$executorPodNamePrefix-exec-${kubernetesConf.executorId}"
 
@@ -157,6 +159,16 @@ private[spark] class BasicExecutorFeatureStep(kubernetesConf: KubernetesExecutor
           .endResources()
         .build()
     }.getOrElse(executorContainer)
+    val containerWithLimitGpus = executorLimitGpus.map { limitGpus =>
+      val executorGpuLimitQuantity = new QuantityBuilder(false)
+        .withAmount(limitGpus)
+        .build()
+      new ContainerBuilder(executorContainer)
+        .editResources()
+          .addToLimits(kubernetesConf.gpuResourceName, executorGpuLimitQuantity)
+          .endResources()
+        .build()
+    }.getOrElse(containerWithLimitCores)
     val ownerReference = kubernetesConf.driverPod.map { pod =>
       new OwnerReferenceBuilder()
         .withController(true)
@@ -181,6 +193,6 @@ private[spark] class BasicExecutorFeatureStep(kubernetesConf: KubernetesExecutor
         .endSpec()
       .build()
 
-    SparkPod(executorPod, containerWithLimitCores)
+    SparkPod(executorPod, containerWithLimitGpus)
   }
 }

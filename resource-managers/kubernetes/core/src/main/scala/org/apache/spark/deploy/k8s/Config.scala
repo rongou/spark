@@ -63,6 +63,13 @@ private[spark] object Config extends Logging {
       .toSequence
       .createWithDefault(Nil)
 
+  val GPU_VENDOR =
+    ConfigBuilder("spark.kubernetes.gpu.vendor")
+      .doc("Vendor of GPU resources. Valid values are nvidia and amd.")
+      .stringConf
+      .checkValues(Set("nvidia", "amd"))
+      .createWithDefault("nvidia")
+
   val KUBERNETES_AUTH_DRIVER_CONF_PREFIX =
       "spark.kubernetes.authenticate.driver"
   val KUBERNETES_AUTH_DRIVER_MOUNTED_CONF_PREFIX =
@@ -89,6 +96,12 @@ private[spark] object Config extends Logging {
       .stringConf
       .createOptional
 
+  val KUBERNETES_DRIVER_LIMIT_GPUS =
+    ConfigBuilder("spark.kubernetes.driver.limit.gpus")
+      .doc("Specify the gpu limit for the driver pod")
+      .stringConf
+      .createOptional
+
   val KUBERNETES_DRIVER_SUBMIT_CHECK =
     ConfigBuilder("spark.kubernetes.submitInDriver")
     .internal()
@@ -104,6 +117,12 @@ private[spark] object Config extends Logging {
   val KUBERNETES_EXECUTOR_REQUEST_CORES =
     ConfigBuilder("spark.kubernetes.executor.request.cores")
       .doc("Specify the cpu request for each executor pod")
+      .stringConf
+      .createOptional
+
+  val KUBERNETES_EXECUTOR_LIMIT_GPUS =
+    ConfigBuilder("spark.kubernetes.executor.limit.gpus")
+      .doc("Specify the gpu limit for each executor pod")
       .stringConf
       .createOptional
 

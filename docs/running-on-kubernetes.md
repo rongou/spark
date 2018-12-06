@@ -456,6 +456,13 @@ specific to Spark on Kubernetes.
   </td>
 </tr>
 <tr>
+  <td><code>spark.kubernetes.gpu.vendor</code></td>
+  <td><code>nvidia</code></td>
+  <td>
+    Vendor of GPU resources. Valid values are <code>nvidia</code> and <code>amd</code>.
+  </td>
+</tr>
+<tr>
   <td><code>spark.kubernetes.allocation.batch.size</code></td>
   <td><code>5</code></td>
   <td>
@@ -734,6 +741,13 @@ specific to Spark on Kubernetes.
   </td>
 </tr>
 <tr>
+  <td><code>spark.kubernetes.driver.limit.gpus</code></td>
+  <td>(none)</td>
+  <td>
+    Specify a <a href="https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/">gpu limit</a> for the driver pod.
+  </td>
+</tr>
+<tr>
   <td><code>spark.kubernetes.executor.request.cores</code></td>
   <td>(none)</td>
   <td>
@@ -748,6 +762,13 @@ specific to Spark on Kubernetes.
   <td>(none)</td>
   <td>
     Specify a hard cpu <a href="https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container">limit</a> for each executor pod launched for the Spark Application.
+  </td>
+</tr>
+<tr>
+  <td><code>spark.kubernetes.executor.limit.gpus</code></td>
+  <td>(none)</td>
+  <td>
+    Specify a <a href="https://kubernetes.io/docs/tasks/manage-gpus/scheduling-gpus/">gpu limit</a> for each executor pod.
   </td>
 </tr>
 <tr>

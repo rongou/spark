@@ -58,6 +58,10 @@ private[spark] abstract class KubernetesConf(val sparkConf: SparkConf) {
       }
   }
 
+  def gpuResourceName: String = {
+    get(GPU_VENDOR) + ".com/gpu"
+  }
+
   def nodeSelector: Map[String, String] =
     KubernetesUtils.parsePrefixedKeyValuePairs(sparkConf, KUBERNETES_NODE_SELECTOR_PREFIX)
 
