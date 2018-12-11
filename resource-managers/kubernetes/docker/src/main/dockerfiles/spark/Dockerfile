@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM openjdk:8-alpine
+FROM nvidia/cuda:10.0-runtime-ubuntu18.04
 
 ARG spark_uid=185
 
@@ -27,8 +27,10 @@ ARG spark_uid=185
 # docker build -t spark:latest -f kubernetes/dockerfiles/spark/Dockerfile .
 
 RUN set -ex && \
-    apk upgrade --no-cache && \
-    apk add --no-cache bash tini libc6-compat linux-pam krb5 krb5-libs && \
+    apt-get update && apt-get install -y wget openjdk-8-jre python libgomp1 && \
+    rm -rf /var/lib/apt/lists/* && \
+    wget -O /sbin/tini https://github.com/krallin/tini/releases/download/v0.18.0/tini && \
+    chmod +x /sbin/tini && \
     mkdir -p /opt/spark && \
     mkdir -p /opt/spark/examples && \
     mkdir -p /opt/spark/work-dir && \
@@ -47,6 +49,7 @@ COPY kubernetes/tests /opt/spark/tests
 COPY data /opt/spark/data
 
 ENV SPARK_HOME /opt/spark
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
 
 WORKDIR /opt/spark/work-dir
 RUN chmod g+w /opt/spark/work-dir
