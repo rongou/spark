@@ -158,9 +158,19 @@ function build {
     --build-arg
     base_img=$(image_ref spark)
   )
+
+  local GPU_BUILD_ARGS=(
+    ${BUILD_PARAMS}
+    --build-arg
+    base_img=$(image_ref spark)
+  )
+
   local BASEDOCKERFILE=${BASEDOCKERFILE:-"kubernetes/dockerfiles/spark/Dockerfile"}
   local PYDOCKERFILE=${PYDOCKERFILE:-false}
   local RDOCKERFILE=${RDOCKERFILE:-false}
+  local GPUDOCKERFILE=${GPUDOCKERFILE:-false}
+  local PYGPUDOCKERFILE=${PYGPUDOCKERFILE:-false}
+  local RGPUDOCKERFILE=${RGPUDOCKERFILE:-false}
 
   (cd $(img_ctx_dir base) && docker build $NOCACHEARG "${BUILD_ARGS[@]}" \
     -t $(image_ref spark) \
@@ -186,12 +196,42 @@ function build {
       error "Failed to build SparkR Docker image, please refer to Docker build output for details."
     fi
   fi
+
+  if [ "${GPUDOCKERFILE}" != "false" ]; then
+    (cd $(img_ctx_dir base) && docker build $NOCACHEARG "${GPU_BUILD_ARGS[@]}" \
+      -t $(image_ref spark-gpu) \
+      -f "$GPUDOCKERFILE" .)
+    if [ $? -ne 0 ]; then
+      error "Failed to build Spark GPU Docker image, please refer to Docker build output for details."
+    fi
+  fi
+
+  if [ "${PYGPUDOCKERFILE}" != "false" ]; then
+    (cd $(img_ctx_dir pyspark) && docker build $NOCACHEARG "${GPU_BUILD_ARGS[@]}" \
+      -t $(image_ref spark-py-gpu) \
+      -f "$PYGPUDOCKERFILE" .)
+    if [ $? -ne 0 ]; then
+      error "Failed to build PySpark GPU Docker image, please refer to Docker build output for details."
+    fi
+  fi
+
+  if [ "${RGPUDOCKERFILE}" != "false" ]; then
+    (cd $(img_ctx_dir sparkr) && docker build $NOCACHEARG "${GPU_BUILD_ARGS[@]}" \
+      -t $(image_ref spark-r-gpu) \
+      -f "$RGPUDOCKERFILE" .)
+    if [ $? -ne 0 ]; then
+      error "Failed to build SparkR GPU Docker image, please refer to Docker build output for details."
+    fi
+  fi
 }
 
 function push {
   docker_push "spark"
   docker_push "spark-py"
   docker_push "spark-r"
+  docker_push "spark-gpu"
+  docker_push "spark-py-gpu"
+  docker_push "spark-r-gpu"
 }
 
 function usage {
@@ -210,6 +250,12 @@ Options:
                         Skips building PySpark docker image if not specified.
   -R file               (Optional) Dockerfile to build for SparkR Jobs. Builds R dependencies and ships with Spark.
                         Skips building SparkR docker image if not specified.
+  -g file               (Optional) Dockerfile to build for Spark GPU Jobs.
+                        Skips building Spark GPU docker image if not specified.
+  -x file               (Optional) Dockerfile to build for PySpark GPU Jobs. Builds Python dependencies and ships with Spark.
+                        Skips building PySpark GPU docker image if not specified.
+  -y file               (Optional) Dockerfile to build for SparkR GPU Jobs. Builds R dependencies and ships with Spark.
+                        Skips building SparkR GPU docker image if not specified.
   -r repo               Repository address.
   -t tag                Tag to apply to the built image, or to identify the image to be pushed.
   -m                    Use minikube's Docker daemon.
@@ -250,16 +296,22 @@ TAG=
 BASEDOCKERFILE=
 PYDOCKERFILE=
 RDOCKERFILE=
+GPUDOCKERFILE=
+PYGPUDOCKERFILE=
+RGPUDOCKERFILE=
 NOCACHEARG=
 BUILD_PARAMS=
 SPARK_UID=
-while getopts f:p:R:mr:t:nb:u: option
+while getopts f:p:R:g:x:y:mr:t:nb:u: option
 do
  case "${option}"
  in
  f) BASEDOCKERFILE=${OPTARG};;
  p) PYDOCKERFILE=${OPTARG};;
  R) RDOCKERFILE=${OPTARG};;
+ g) GPUDOCKERFILE=${OPTARG};;
+ x) PYGPUDOCKERFILE=${OPTARG};;
+ y) RGPUDOCKERFILE=${OPTARG};;
  r) REPO=${OPTARG};;
  t) TAG=${OPTARG};;
  n) NOCACHEARG="--no-cache";;

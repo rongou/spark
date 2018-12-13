@@ -99,6 +99,24 @@ $ ./bin/docker-image-tool.sh -r <repo> -t my-tag -p ./kubernetes/dockerfiles/spa
 
 # To build additional SparkR docker image
 $ ./bin/docker-image-tool.sh -r <repo> -t my-tag -R ./kubernetes/dockerfiles/spark/bindings/R/Dockerfile build
+
+# To build additional Spark GPU docker image
+$ ./bin/docker-image-tool.sh -r <repo> -t my-tag -g ./kubernetes/dockerfiles/spark/Dockerfile.gpu build
+```
+
+By default `bin/docker-image-tool.sh` builds docker image for running on CPUs. You need to opt-in to build additional 
+docker images for running on GPUs.
+
+Example usage is
+```bash
+# To build additional Spark GPU docker image
+$ ./bin/docker-image-tool.sh -r <repo> -t my-tag -g ./kubernetes/dockerfiles/spark/Dockerfile.gpu build
+
+# To build additional PySpark GPU docker image
+$ ./bin/docker-image-tool.sh -r <repo> -t my-tag -p ./kubernetes/dockerfiles/spark/bindings/python/Dockerfile.gpu build
+
+# To build additional SparkR GPU docker image
+$ ./bin/docker-image-tool.sh -r <repo> -t my-tag -R ./kubernetes/dockerfiles/spark/bindings/R/Dockerfile.gpu build
 ```
 
 ## Cluster Mode
